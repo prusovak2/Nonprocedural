@@ -1,0 +1,15 @@
+word(astante, a,s,t,a,n,t,e).
+word(astoria, a,s,t,o,r,i,a).
+word(baratto, b,a,r,a,t,t,o).
+word(cobalto, c,o,b,a,l,t,o).
+word(pistola, p,i,s,t,o,l,a).
+word(statale, s,t,a,t,a,l,e).
+
+solvePuzzle(V1,V2,V3,H1,H2,H3):-
+    word(H1, A1,A2,A3,A4,A5,A6,A7),
+    word(H2, B1,B2,B3,B4,B5,B6,B7),
+    word(H3, C1,C2,C3,C4,C5,C6,C7),
+    word(V1, D1,A2,D2,B2,D3,C2,D4),
+    word(V2, E1,A4,E2,B4,E3,C4,E4),
+    word(V3, F1,A6,F2,B6,F3,C6,F4),
+    not(V1==H1), not(V2==H2), not(V3==H3).
