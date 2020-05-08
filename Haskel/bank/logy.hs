@@ -34,6 +34,7 @@ main = do
   result
     "DEMO2 -- pocet zaznamu se jmenem Marie"
     demoPocetMarie
+  result "mujtest" getVybery
   result "Seznam uzivatelu serazenych podle abecedy" serazeniUzivatele
   result "Casy top 10 nejvetsich vyberu" top10vyber
   result "Jmena uzivatelu 10 nejmensich pripisu" top10pripis
@@ -62,21 +63,23 @@ demoPocetMarie = length . filter uzivatelMarie
 {- Ukol zacina tady. Misto `undefined` dodejte definice funkci, ktere z logu
  - vytahnou pozadovany vysledek. -}
 
+getVybery x = map ( foldl addOrSubtract ("", 0) ( groupBy isSameUser (sortOn getName $ filter isDepositOrWithdrawal x ) )  )
+
 -- Seznam uživatelů (bez duplicit), seřazený podle abecedy
 serazeniUzivatele :: Zaznamy -> [Uzivatel]
-serazeniUzivatele = undefined
+serazeniUzivatele x = nub $ map getUser (sortOn getName x ) 
 
 -- Časy deseti největších výběrů
 top10vyber :: Zaznamy -> [Cas]
-top10vyber = undefined
+top10vyber x = map getTime $ take 10 (sortOn getNegativeWithdrawal (filter isWithdrawal x) ) -- NegativeWithdrawal to sort in descending order
 
 -- Jména uživatelů, kterým přišlo deset nejmenších přípisů (bez opakování jmen)
 top10pripis :: Zaznamy -> [Uzivatel]
-top10pripis = undefined
+top10pripis x = take 10 $ nub $ map getUser (sortOn getDeposit (filter isDeposit x) ) 
 
 -- Jméno uživatele, který je nejaktivnější (tj. má v logu nejvíc záznamů)
 topUzivatel :: Zaznamy -> Uzivatel
-topUzivatel = undefined
+topUzivatel x = getUserFromUsrLenTuple $ head $ sortBy (\(_, a) (_, b) -> compare b a) $ map getLenghtAndUser $ group $ map getUser (sortOn getName x )
 
 -- Jméno uživatele, kterému na účtu přibylo nejvíc peněz (tj. má maximální součet příjmů mínus součet výdajů)
 topPrirustek :: Zaznamy -> Uzivatel
@@ -92,3 +95,49 @@ nejdelsiSingleRun = undefined
 
 getName :: Zaznam -> String
 getName (Zaznam _ name _ ) = name
+
+getUser :: Zaznam -> Uzivatel
+getUser (Zaznam _ user _ ) = user
+
+isSameUser :: Zaznam -> Zaznam -> Bool
+isSameUser (Zaznam _ user1 _ ) (Zaznam _ user2 _ ) = user1 == user2
+
+getTime :: Zaznam -> Cas
+getTime (Zaznam time _ _ ) = time
+
+getNegativeWithdrawal :: Zaznam -> Castka
+getNegativeWithdrawal (Zaznam _ _  (Vyber money) ) = money * (-1)
+getNegativeWithdrawal (Zaznam _ _ _ ) =  0
+
+getWithdrawal :: Zaznam -> Castka
+getWithdrawal (Zaznam _ _  (Vyber money) ) = money 
+getWithdrawal (Zaznam _ _ _ ) =  0
+
+isWithdrawal :: Zaznam -> Bool
+isWithdrawal (Zaznam _ _  (Vyber _) ) = True
+isWithdrawal (Zaznam _ _ _ ) = False
+
+getDeposit :: Zaznam -> Castka
+getDeposit (Zaznam _ _  (Pripis money) ) = money 
+getDeposit (Zaznam _ _ _ ) =  0
+
+isDeposit :: Zaznam -> Bool
+isDeposit (Zaznam _ _  (Pripis _) ) = True
+isDeposit (Zaznam _ _ _ ) = False
+
+isDepositOrWithdrawal :: Zaznam -> Bool
+isDepositOrWithdrawal (Zaznam _ _  (Pripis _) ) = True
+isDepositOrWithdrawal (Zaznam _ _  (Vyber _) ) = True 
+isDepositOrWithdrawal (Zaznam _ _ _ ) = False
+
+--takes list of multiple occurences of one user and returns User and number of its occurences
+getLenghtAndUser :: [Uzivatel] -> (Uzivatel, Int)
+getLenghtAndUser x = (head x, length x)
+
+getUserFromUsrLenTuple :: (Uzivatel, Int) -> Uzivatel
+getUserFromUsrLenTuple (usr, _ ) = usr
+
+addOrSubtract :: Zaznam -> (Uzivatel, Integer) -> (Uzivatel, Integer)
+addOrSubtract (Zaznam _ usr  (Pripis  money) ) (_, total) = (usr, ((+) total money)) 
+addOrSubtract (Zaznam _ usr  (Vyber money) ) (_, total) = (usr, ((-) total money)) 
+addOrSubtract (Zaznam _ _ _ ) (_ , _) = error "Invalid Record"
