@@ -1,3 +1,5 @@
+import Data.List
+
 data Op = Plus | Minus | Times 
   deriving (Eq, Ord)
 
@@ -23,3 +25,6 @@ instance Show Exp where
 isConst :: Exp -> Bool
 isConst (Const _ ) = True
 isConst _ = False
+
+split :: [Int] -> [([Int],[Int])]
+split xs = [(splitAt len xs )| len <- [1..((length xs)-1)] ]
