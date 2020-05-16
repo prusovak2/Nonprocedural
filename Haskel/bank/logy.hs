@@ -64,7 +64,7 @@ demoPocetMarie = length . filter uzivatelMarie
 {- Ukol zacina tady. Misto `undefined` dodejte definice funkci, ktere z logu
  - vytahnou pozadovany vysledek. -}
 
-getVybery x = countAverage $ sumAndLenght $ map getMoney $ filter isJUser $ filter isWithdrawal x
+getVybery x = ( map ( foldr (addOrSubtract) ("abraka", 0) ) ( groupBy isSameUser (sortOn getName $ filter isDepositOrWithdrawal x ) ) )
 -- Seznam uživatelů (bez duplicit), seřazený podle abecedy
 serazeniUzivatele :: Zaznamy -> [Uzivatel]
 serazeniUzivatele x = nub $ map getUser (sortOn getName x ) 
