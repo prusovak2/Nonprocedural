@@ -50,6 +50,15 @@ generate xs = [ (Oper op arg1 arg2) | (list1, list2) <- split xs , op <- operato
 generateArit :: [Int] -> [Exp]
 generateArit xs = generate $ listIntToListConst xs
 
+evalOp :: Op -> Int -> Int -> Int
+evalOp Plus a b = (a+b)
+evalOp Minus a b = (a-b)
+evalOp Times a b = (a*b)
+
+eval :: Exp -> Int
+eval (Const n) = n
+eval (Oper op arg1 arg2) = evalOp op (eval arg1) (eval arg2) 
+
 
 --generate xs = [ [(Oper op arg1 arg2) |  op <- operators, arg1 <- (generate list1), arg2 <-(generate list2) ] | (list1, list2) <- split xs ]
 --generate :: [Int] -> [Exp]
