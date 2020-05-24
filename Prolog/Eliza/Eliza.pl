@@ -5,15 +5,11 @@ readLetters(33, [], 33) :- !.  %Exclamation mark !
 readLetters(63, [], 63) :- !.  %question mark ?
 readLetters(32, [], 32) :- !.  %space
 readLetters(9, [], 9) :- !.  %horizontal tab
+readLetters(44, [], 44) :- !.  %comma
 %end of line?
 readLetters(Letter, [Letter|LetterList], AnotherLetter):-
     get_code(Code),
     readLetters(Code,LetterList, AnotherLetter).
-
-%readSentence(-listOfWordsInASentence)
-readSentence(WordList):-
-    get(Char),  %read the first letter
-    readRest(Char,WordList).
 
 %readRest(+Char, -WordList)
 readRest(46, []) :- !.  %full stop .
@@ -21,6 +17,8 @@ readRest(33, []) :- !.  %Exclamation mark !
 readRest(63, []) :- !.  %question mark ?
 readRest(32, WordList) :- 
     readSentence(WordList).  %space
+readRest(44, WordList) :- 
+        readSentence(WordList).  %comma
 readRest(9, WordList) :- 
     readSentence(WordList).  %horizontal tab
 readRest(Letter, [Word | WordList]):-
@@ -28,5 +26,8 @@ readRest(Letter, [Word | WordList]):-
     name(Word, LetterList),
     readRest(AnotherLetter,WordList).
     
-
+%readSentence(-listOfWordsInASentence)
+readSentence(WordList):-
+    get(Char),  %read the first letter
+    readRest(Char,WordList).
 
