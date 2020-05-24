@@ -1,4 +1,4 @@
-% INPUT PARSER
+%%%%%%%%%%%%%%%%%%%%%%%%%%% INPUT PARSER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %readLetter(+inputLetter, -listOfLettersTheWordConsistsof, -letterFollowingTheWord)
 readLetters(46, [], 46) :- !.  %full stop .
 readLetters(33, [], 33) :- !.  %Exclamation mark !
@@ -31,3 +31,28 @@ readSentence(WordList):-
     get(Char),  %read the first letter
     readRest(Char,WordList).
 
+keyword(remember, 20).
+keyword(computer, 10).
+keyword(my, 24).
+keyword(what, 24).
+keyword(yes, 25).
+keyword(no, 25).
+
+findMostImportantKeyWord([],Res,Res):- nonvar(Res),!.
+findMostImportantKeyWord([],_,none).
+findMostImportantKeyWord([Word|List], BestSoFar, Res):-
+    var(BestSoFar),
+    keyword(Word, _),
+    findMostImportantKeyWord(List, Word, Res), !.
+findMostImportantKeyWord([Word|List], BestSoFar, Res):-
+    keyword(Word, WordPriority),
+    keyword(BestSoFar, BestPriority),
+    WordPriority < BestPriority,
+    findMostImportantKeyWord(List, Word, Res), !.
+findMostImportantKeyWord([_|List], BestSoFar, Res):-
+    findMostImportantKeyWord(List, BestSoFar, Res).
+
+test(KeyW):-
+    readSentence(Sen), findMostImportantKeyWord(Sen,_,KeyW ).
+
+ 
