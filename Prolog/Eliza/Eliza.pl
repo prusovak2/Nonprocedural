@@ -34,6 +34,7 @@ readRest(Letter, [Word | WordList]):-
     readRest(AnotherLetter,WordList).
     
 %readSentence(-listOfWordsInASentence)
+%read sentense from input, casts all words to lower case and stores them in WordList
 readSentence(WordList):-
     get(Char),  %read the first letter
     charToLowerCase(Char,LowChar),
@@ -44,6 +45,18 @@ charToLowerCase(In,Out):-
     In =< 90,
     Out is In + 32.
 charToLowerCase(In,In).
+
+numsToString([X|Input], [Y|Output]):-
+    integer(X),
+    number_string(X, Y),
+    numsToString(Input,Output),!.
+numsToString([X|Input], [X|Output]):-
+    numsToString(Input,Output).
+numsToString([],[]).
+
+readSentenceCastingNumbers(WordListCasted):-
+    readSentence(WordList),
+    numsToString(WordList, WordListCasted).
 
 %does not work for me as string_lower cast string into ""
 /*wordListToLowerCase([H|InputList], [LowH |LowerCaseList]):-
