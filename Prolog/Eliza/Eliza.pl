@@ -6,10 +6,13 @@ readLetters(63, [], 63) :- !.  %question mark ?
 readLetters(32, [], 32) :- !.  %space
 readLetters(9, [], 9) :- !.  %horizontal tab
 readLetters(44, [], 44) :- !.  %comma
-%end of line?
+%end of line - what should I do about it?
+readLetters(10, [], 10):-!. %Line feed
+readLetters(13, [], 13):-!. %carrige return
 readLetters(Letter, [Letter|LetterList], AnotherLetter):-
     get_code(Code),
-    readLetters(Code,LetterList, AnotherLetter).
+    charToLowerCase(Code, LowerCode),
+    readLetters(LowerCode,LetterList, AnotherLetter).
 
 %readRest(+Char, -WordList)
 readRest(46, []) :- !.  %full stop .
@@ -19,6 +22,10 @@ readRest(32, WordList) :-
     readSentence(WordList).  %space
 readRest(44, WordList) :- 
         readSentence(WordList).  %comma
+readRest(10, WordList) :- 
+            readSentence(WordList). %Line feed
+readRest(13, WordList) :- 
+            readSentence(WordList). %carrige return
 readRest(9, WordList) :- 
     readSentence(WordList).  %horizontal tab
 readRest(Letter, [Word | WordList]):-
@@ -29,12 +36,27 @@ readRest(Letter, [Word | WordList]):-
 %readSentence(-listOfWordsInASentence)
 readSentence(WordList):-
     get(Char),  %read the first letter
-    readRest(Char,WordList).
+    charToLowerCase(Char,LowChar),
+    readRest(LowChar,WordList).
+
+charToLowerCase(In,Out):-
+    In >= 65,
+    In =< 90,
+    Out is In + 32.
+charToLowerCase(In,In).
+
+%does not work for me as string_lower cast string into ""
+/*wordListToLowerCase([H|InputList], [LowH |LowerCaseList]):-
+    string_lower(H, LowH),
+    wordListToLowerCase(InputList, LowerCaseList).
+wordListToLowerCase([],[]).*/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DATABAZE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 %keyword(keyword, priority)
 %database of keywords
-keyword(remember, 20).
 keyword(computer, 10).
+keyword(remember, 20).
 keyword(are, 24).
 keyword(my, 24).
 keyword(what, 24).
@@ -62,7 +84,7 @@ prepareScript():-
     assertz(toUse(remember,2,0)),
     assertz(toUse(remember,3, 0)).
 
-%%%%%%%%%%%%%%%%%% DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS %%%%%%%%%%%%%
+%DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS 
 response(remember, 1, [
     [do,you,often,think,of,1,?],
     [does,thinking,of,1,bring,anything,else,to,mind,?],
@@ -185,7 +207,7 @@ findKeyValue(Key, [Key1-_|KeyValList], Value):-
 %or none if no KeyWord is present
 findMostImportantKeyWord([],Res,Res):- nonvar(Res),!. %return keyWord found - Res has been already unified
 findMostImportantKeyWord([],_,none). %no key word present in WordList
-%initialize BestSoFar bt the first KeyWord found
+%initialize BestSoFar by the first KeyWord found
 findMostImportantKeyWord([Word|List], BestSoFar, Res):-
     var(BestSoFar),
     keyword(Word, _),
@@ -221,7 +243,12 @@ testResponse(X,Y,Z,A,B,C,D,E):-
     getResponse(remember,[do, you, remember, abraka], E).
 
 testKeyWordLookUp(KeyW):-
-    readSentence(Sen), findMostImportantKeyWord(Sen,_,KeyW ).
+    readSentence(Sen), 
+    %wordListToLowerCase(Sen, LowerCaseList),
+    findMostImportantKeyWord(Sen,_,KeyW ).
+
+%testListLower(LowerCaseList):-
+%    readSentence(Sen), wordListToLowerCase(Sen, LowerCaseList).
 
 
 
