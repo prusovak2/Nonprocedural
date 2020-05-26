@@ -92,7 +92,7 @@ simplificationRule([am|X],[are|Y],X,Y).
 simplificationRule([your|X],[my|Y],X,Y).
 simplificationRule([were|X],[was|Y],X,Y).
 simplificationRule([me|X],[you|Y],X,Y).
-simplificationRule([are,you|X],['i\'m'|Y],X,Y). %maybe incorrect
+%simplificationRule([are,you|X],['i\'m'|Y],X,Y). %maybe incorrect
 simplificationRule([you,'\'',re|X],['i\'m'|Y],X,Y).
 simplificationRule([you,are|X],['i\'m'|Y],X,Y).
 simplificationRule([i,'\'',m|X],['you\'re'|Y],X,Y).     
@@ -135,10 +135,8 @@ keyword(no, 25).
 keyword(can,24).
 
 
-
-
-%keyword(none, 1000).
-
+pronoun(they).
+pronoun(we).
 
 %pattern(keyword,question pattern, pattern Id)
 %to match keyWords to corresponding question patterns
@@ -149,7 +147,7 @@ pattern(remember,[1], 3).
 pattern(none,[1], 1).
 pattern(are,[73,are,you,1], 1).
 pattern(are,[73,are,i,1], 2).
-pattern(are,[73,are,1], 3).
+pattern(are,[73,are,1,2], 3):-pronoun(1).
 pattern(are,[73], 4).
 pattern(abraka,[abraka], 1).
 pattern(abraka,[73], 2).
@@ -196,6 +194,7 @@ prepareScript():-
     assertz(toUse(why,3,0)).
     
 %DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS 
+% _ I remember 1
 response(remember, 1, [
     [do,you,often,think,of,1,?],
     [does,thinking,of,1,bring,anything,else,to,mind,?],
@@ -204,22 +203,27 @@ response(remember, 1, [
     [what,in,the,present,situation,reminds,you,of,1,?],
     [what,is,the,connection,between,me,and,1,?]
 ] ).
+% _ do you remember 1
 response(remember, 2 ,[
     [did,you,think,'I',would,forget,1,?],
     [why,do,you,think,i,should,recall,1,now,?],
     [what,about,1,?],
     [you,mentioned,1,'.']
 ] ).
+% _ remember _
 response(remember, 3,[
     [it,is,deffinitely, worth,remembering,tell,me,more,'.'],
     [if, you, tell, me, more,'I', may, recall, it,'.' ]
 ] ).
+% _ language _
 response(language, 1,[
     ['I',am,sorry,',','I',only,speak,'English','.'],
     ['I', have, already, told, you, that, 'I', only, speak, 'English','.'],
     [could, you, possibly, stop, talking, about, languages,?],
     [your, fixation, on, languages, freaks, me, out,'.'] 
 ]).
+% _ 
+% universal responses for input without keywords 
 response(none, 1, [
     ['I',am,not,sure,'I',understand,you,fully,'.'],
     ['I',just,want,to,be,upfront,and,say,that,'I',visually,enjoy,you,'.'],
@@ -230,12 +234,14 @@ response(none, 1, [
     [do,you,feel,strongly,about,discussing,such,things,?],
     [whatever,'.','Nice',shirt,',',can,'I',talk,you,out,of,it,?]
     ]).
+% Am I 1
 response(are, 1,[
     [do,you,believe,you,are,1,?],
     [would,you,want,to,be,1,?],
     [you,wish,'I',would,tell,you,you,are,1,?],
     [what,would,it,mean,if,you,were,1,?]
     ]).
+% Are you 1
 response(are, 2,[
     [why,are,you,interested,in,whether,'I',am,1,or,not,?],
     [would,you,prefer,if,'I',were,not,1,?],
@@ -243,10 +249,10 @@ response(are, 2,[
     [do,you,sometimes,think,'I',am,1,?]
     ]).
 response(are, 3,[
-    [did,you,think,they,might,not,be,1,?],
-    [would,you,like,it,if,they,were,not,1,?],
-    [what,if,they,were,not,1,?],
-    [possibly,they,are,1,'.']
+    [did,you,think,1,might,not,be,2,?],
+    [would,you,like,it,if,1,were,not,2,?],
+    [what,if,1,were,not,2,?],
+    [possibly,1,are,2,'.']
     ]).
 response(are, 4,[
     [why,do,you,say,am,?],
