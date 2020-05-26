@@ -1,3 +1,8 @@
+% ELIZA 
+% Katerina Prusova, sophomore MFF UK
+% summer semestr 2019/2020
+% nonprocedural programing NPRG005
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%% INPUT PARSER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % readLetter(+inputLetter, -listOfLettersTheWordConsistsof, -letterFollowingTheWord)
 readLetters(46, [], 46) :- !.  %full stop .
