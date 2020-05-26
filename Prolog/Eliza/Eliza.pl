@@ -1,12 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% INPUT PARSER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%readLetter(+inputLetter, -listOfLettersTheWordConsistsof, -letterFollowingTheWord)
+% readLetter(+inputLetter, -listOfLettersTheWordConsistsof, -letterFollowingTheWord)
 readLetters(46, [], 46) :- !.  %full stop .
 readLetters(33, [], 33) :- !.  %Exclamation mark !
 readLetters(63, [], 63) :- !.  %question mark ?
 readLetters(32, [], 32) :- !.  %space
 readLetters(9, [], 9) :- !.  %horizontal tab
 readLetters(44, [], 44) :- !.  %comma
-%end of line - what should I do about it?
+% end of line - what should I do about it?
 readLetters(10, [], 10):-!. %Line feed
 readLetters(13, [], 13):-!. %carrige return
 readLetters(Letter, [Letter|LetterList], AnotherLetter):-
@@ -14,7 +14,7 @@ readLetters(Letter, [Letter|LetterList], AnotherLetter):-
     charToLowerCase(Code, LowerCode),
     readLetters(LowerCode,LetterList, AnotherLetter).
 
-%readRest(+Char, -WordList)
+% readRest(+Char, -WordList)
 readRest(46, []) :- !.  %full stop .
 readRest(33, []) :- !.  %Exclamation mark !
 readRest(63, []) :- !.  %question mark ?
@@ -132,36 +132,37 @@ keyword(why, 24).
 keyword(my, 25).
 keyword(yes, 25).
 keyword(no, 25).
-keyword(can,24).
+keyWord(you, 30).
 
-
-pronoun(they).
-pronoun(we).
 
 %pattern(keyword,question pattern, pattern Id)
 %to match keyWords to corresponding question patterns
-pattern(language,[1], 1).
-pattern(remember,[73,you,remember,1], 1).
-pattern(remember,[73,do,i,remember,1], 2).
-pattern(remember,[1], 3).
-pattern(none,[1], 1).
-pattern(are,[73,are,you,1], 1).
-pattern(are,[73,are,i,1], 2).
-pattern(are,[73,are,1,2], 3):-pronoun(1).
-pattern(are,[73], 4).
-pattern(abraka,[abraka], 1).
-pattern(abraka,[73], 2).
-pattern(computer, [73], 1).
-pattern(my,[73,my,1], 1).
-pattern(yes,[73], 1).
-pattern(no,[73], 1).
-pattern(what,[73], 1).
-pattern(because,[73], 1).
-pattern(can,[73,can,i,1] ,1).
-pattern(can,[73,can,you,1], 2).
-pattern(why,[73,why,dont,i,1], 1).
-pattern(why,[73,why,cant,you,1], 2).
-pattern(why,[73], 3).
+pattern(language,[1], 1,_).
+pattern(remember,[73,you,remember,1], 1,_).
+pattern(remember,[73,do,i,remember,1], 2, _).
+pattern(remember,[1], 3,_).
+pattern(none,[1], 1,_).
+pattern(are,[73,are,you,1], 1,_).
+pattern(are,[73,are,i,1], 2,_).
+pattern(are,[73,are,X,2], 3, X):-pronoun(X).
+pattern(are,[73], 4,_).
+pattern(abraka,[abraka], 1,_).
+pattern(abraka,[73], 2, _).
+pattern(computer, [73], 1, _).
+pattern(my,[73,my,1], 1,_).
+pattern(yes,[73], 1, _).
+pattern(no,[73], 1,_).
+pattern(what,[73], 1,_).
+pattern(because,[73], 1,_).
+pattern(can,[73,can,i,1] ,1,_).
+pattern(can,[73,can,you,1], 2,_).
+pattern(why,[73,why,dont,i,1], 1,_).
+pattern(why,[73,why,cant,you,1], 2,_).
+pattern(why,[73], 3,_).
+pattern(you,[73,you,cant,1], 1,_).
+pattern(you,[73,you,dont,1], 2,_).
+pattern(you,[73,you,feel,1], 3,_).
+pattern(you,[73,you,1,i,42], 4,_).
 
 
 
@@ -202,68 +203,73 @@ response(remember, 1, [
     [why,do,you,remember,1,just,now,?],
     [what,in,the,present,situation,reminds,you,of,1,?],
     [what,is,the,connection,between,me,and,1,?]
-] ).
+],_ ).
 % _ do you remember 1
 response(remember, 2 ,[
     [did,you,think,'I',would,forget,1,?],
     [why,do,you,think,i,should,recall,1,now,?],
     [what,about,1,?],
     [you,mentioned,1,'.']
-] ).
+],_ ).
 % _ remember _
 response(remember, 3,[
     [it,is,deffinitely, worth,remembering,tell,me,more,'.'],
     [if, you, tell, me, more,'I', may, recall, it,'.' ]
-] ).
+],_ ).
 % _ language _
 response(language, 1,[
     ['I',am,sorry,',','I',only,speak,'English','.'],
     ['I', have, already, told, you, that, 'I', only, speak, 'English','.'],
     [could, you, possibly, stop, talking, about, languages,?],
     [your, fixation, on, languages, freaks, me, out,'.'] 
-]).
+],_).
 % _ 
 % universal responses for input without keywords 
 response(none, 1, [
     ['I',am,not,sure,'I',understand,you,fully,'.'],
     ['I',just,want,to,be,upfront,and,say,that,'I',visually,enjoy,you,'.'],
-    [please,go,on,.],
+    [please,go,on,'.'],
     ['I','don\'t',know,about,that,but,do,you,know,what,?,'You',could,never,be,an,ice,cream,because,'you\'re',so,hot,'...',and,a,person,'.'],
     [what,does,that,suggest,to,you,?],
     [what,you,are,saying,is,confusing,but,'I\'m',pretty,sure,that,if,you,were,a,fruit,'you\'d',be,a,fineapple,'.'],
     [do,you,feel,strongly,about,discussing,such,things,?],
     [whatever,'.','Nice',shirt,',',can,'I',talk,you,out,of,it,?]
-    ]).
+], _).
 % Am I 1
 response(are, 1,[
     [do,you,believe,you,are,1,?],
     [would,you,want,to,be,1,?],
     [you,wish,'I',would,tell,you,you,are,1,?],
     [what,would,it,mean,if,you,were,1,?]
-    ]).
+],_).
 % Are you 1
 response(are, 2,[
     [why,are,you,interested,in,whether,'I',am,1,or,not,?],
     [would,you,prefer,if,'I',were,not,1,?],
     [perhaps,'I',am,1,in,your,fantasies,'.'],
     [do,you,sometimes,think,'I',am,1,?]
-    ]).
+],_).
+% Are they/we 2
 response(are, 3,[
-    [did,you,think,1,might,not,be,2,?],
-    [would,you,like,it,if,1,were,not,2,?],
-    [what,if,1,were,not,2,?],
-    [possibly,1,are,2,'.']
-    ]).
+    [did,you,think,X,might,not,be,2,?],
+    [would,you,like,it,if,X,were,not,2,?],
+    [what,if,X,were,not,2,?],
+    [possibly,X,are,2,'.']
+],X).
+% _ are _
 response(are, 4,[
     [why,do,you,say,am,?],
     ['I',do,not,understand,that,'.']
-    ]).
+],_).
+% abraka
 response(abraka,1,[
     [dabra,'!']
-    ]).
+],_).
+% _ abraka _
 response(abraka,2,[
     [abraka, dabra,'!']
-]).
+],_).
+% _ computer _
 response(computer,1,[
     [do,computers,worry,you,?],
     [why,do,you,mention,computers,?],
@@ -274,13 +280,15 @@ response(computer,1,[
     [what,about,machines,worries,you,?],
     [are,you,worried,about,possible,machine,uprising,?],
     [what,do,you,think,about,machines,?]
-]).
+],_).
+% _ my _
 response(my,1,[
     [why,are,you,concerned,over,my,1,?],
     [what,about,your,own,1,?],
     [are,you,worried,about,someone,elses,1,?],
     [really,',',my,1,?]
-    ]).
+],_).
+% _ yes _
 response(yes,1,[
     [you,seem,quite,positive,'.'],
     [are,you,sure,?],
@@ -288,7 +296,8 @@ response(yes,1,[
     [i,see,'.'],
     [that,is,really,surprising,'.'],
     [i,understand,'.']
-    ]).
+],_).
+% _ no _
 response(no,1,[
     [are,you,saying,no,just,to,be,negative,?],
     [you,are,being,a,bit,negative,'aren\'t',you,?],
@@ -297,7 +306,8 @@ response(no,1,[
     [why,not,?],
     [why,no,?],
     [what,can,a,machine,do,against,such,reckless,hate,?]
-    ]).
+],_).
+% _ what _
 response(what,1,[
     [why,do,you,ask,?],
     [does,that,question,interest,you,?],
@@ -308,39 +318,108 @@ response(what,1,[
     [what,comes,to,your,mind,when,you,ask,that,?],
     [have,you,asked,such,questions,before,?],
     [have,you,asked,anyone,else,?]
-    ]).
+],_).
+% because
 response(because,1,[
     [is,that,the,real,reason,?],
     [do,any,other,reasons,not,come,to,mind,?],
     [are,you,familiar,with,a,difference,between,correlation,and,causality,?],
     [does,that,reason,seem,to,explain,anything,else,?],
     [what,other,reasons,might,there,be,?]
-    ]).
+],_).
+% _ can you 1
 response(can,1,[	
     [you,believe,'I',can,1,',','don\'t',you,?],
     [you,want,me,to,be,able,to,1,?],
     [perhaps,you,would,like,to,be,able,to,1,yourself,?]
-    ]).       
+],_).    
+% _ can I 1   
 response(can,2,[
     [whether,or,not,you,can,1,depends,on,you,more,than,on,me,'.'],
     [do,you,want,to,be,able,to,1,?],
     [perhaps,you,do,not,want,to,1,'.']
-    ]).
+],_).
+% _ why dont you 1
 response(why,1,[
     [do,you,believe,'I',do,not,1,?],
     [perhaps,'I',will,1,in,good,time,'.'],
     [should,you,1,yourself,?],
     [you,want,me,to,1,?]
-    ]).
+],_).
+% _ why cant i 1
 response(why,2,[
     [do,you,think,you,should,be,able,to,1,?],
     [do,you,want,to,be,able,to,1,?],
     [do,you,believe,this,will,help,you,to,1,?],
     [have,you,any,idea,why,you,can,not,1,?]
-	]).
+],_).
+% _ why _
 response(why,3,[
     [why,not,?]
-    ]).
+],_).
+
+response(you,1,[
+    [how,do,you,know,you,can,not,1,?],
+    [have,you,tried,?],
+    [perhaps,you,could,1,now,?],
+    [do,you,really,want,to,be,able,to,1,?]
+],_).
+response(you,2,[
+    [do,you,not,really,1,?],
+    [why,do,you,not,1,?],
+    [do,you,wish,to,be,able,to,1,?],
+    [does,that,trouble,you,?]
+],_).
+response(you,3,[
+    [tell,me,more,about,such,feelings,'.'],
+    [do,you,often,feel,1,?],
+    [do,you,enjoy,feeling,1,?],
+    [of,what,does,feeling,1,remind,you,?]
+],_).        
+response(you,4,[
+    [perhaps,in,your,fantasy,we,1,each,other,?],
+    [do,you,wish,to,1,me,?],
+    [you,seem,to,need,to,1,me,'.'],
+    [do,you,1,anyone,else,?]
+],_).
+response(you,5,[_,you,[*,want,need,_],Y],0,
+		[what,would,it,mean,to,you,if,you,got,Y,?],
+		[why,do,you,want,Y,?],
+		[suppose,you,got,Y,soon,?],
+		[what,if,you,never,got,Y,?],
+		[what,would,getting,Y,mean,to,you,?],
+		[what,does,wanting,Y,have,to,do,with,this,discussion,?]],
+	[7,[_,you,[*,feel,think,believe,wish,_],you,Y],0,
+		[do,you,really,think,so,?],
+		[but,you,are,not,sure,you,Y,?],
+		[do,you,really,doubt,you,Y,?]],
+        [8,[_,you,_,[*,feel,think,believe,wish,_],_,i,_],0,
+		[equal,[you,0]]],
+	[9,[_,youre,_,[*,sad,unhappy,depressed,sick,M],_],0,
+		['I',am,sorry,to,hear,you,are,M,.],
+		[do,you,think,coming,here,will,help,you,not,to,be,M,?],
+		['I',am,sure,it,is,not,pleasant,to,be,M,.],
+		[can,you,explain,what,made,you,M,?]],
+	[10,[_,youre,_,[*,happy,elated,glad,better,M],_],0,
+		[how,have,'I',helped,you,to,be,M,?],
+		[has,your,treatment,made,you,M,?],
+		[what,makes,you,M,just,now,?],
+		[can,you,explain,why,you,are,suddenly,M,?]],
+	[11,[_,youre,Y],0,
+		[is,it,because,you,are,Y,that,you,came,to,me,?],
+		[how,long,have,you,been,Y,?],
+		[do,you,believe,it,normal,to,be,Y,?],
+		[do,you,enjoy,being,Y,?]],
+	[12,[X],0,
+		[you,say,X],
+		[can,you,elaborate,on,that,?],
+		[do,you,say,X,for,some,special,reason,?],
+		[that,is,quite,interesting,.]]]]).
+
+
+% WORD CLASSES - groups of words similar in some way, that fit in the same places in sentences
+pronoun(they).
+pronoun(we).
 
 
 
@@ -350,11 +429,11 @@ response(why,3,[
 %creates response sentence based on Input and alredy selected KeyWord from Input
 getResponse(KeyWord,Input,Response):-
     %match particular pattern for given KeyWord
-    pattern(KeyWord,Pattern, PatternNum),
+    pattern(KeyWord,Pattern, PatternNum, AdditionalInfo),
     %fill KeyValList with values from Pattern
     match(Pattern, KeyValList,Input),
     %get ResponsePatternList by particular KeyWord and chosen pattern
-    response(KeyWord, PatternNum, ResponsePatternList),
+    response(KeyWord, PatternNum, ResponsePatternList, AdditionalInfo),
     %get index of response pattern from ResponsePatternList, that should be used right now
     toUse(KeyWord,PatternNum,LastUsedNum),
     %forget old num of response pattern to use
