@@ -6,18 +6,20 @@ readLetters(63, [], 63) :- !.  %question mark ?
 readLetters(32, [], 32) :- !.  %space
 readLetters(9, [], 9) :- !.  %horizontal tab
 readLetters(44, [], 44) :- !.  %comma
-% end of line - what should I do about it?
 readLetters(10, [], 10):-!. %Line feed
 readLetters(13, [], 13):-!. %carrige return
+% read letters of one word until word ends
 readLetters(Letter, [Letter|LetterList], AnotherLetter):-
     get_code(Code),
     charToLowerCase(Code, LowerCode),
     readLetters(LowerCode,LetterList, AnotherLetter).
 
 % readRest(+Char, -WordList)
+% end of sentence
 readRest(46, []) :- !.  %full stop .
 readRest(33, []) :- !.  %Exclamation mark !
 readRest(63, []) :- !.  %question mark ?
+% end of word
 readRest(32, WordList) :- 
     readSentence(WordList).  %space
 readRest(44, WordList) :- 
@@ -28,24 +30,31 @@ readRest(13, WordList) :-
             readSentence(WordList). %carrige return
 readRest(9, WordList) :- 
     readSentence(WordList).  %horizontal tab
+% 
 readRest(Letter, [Word | WordList]):-
+    % (+Letter already read, -List of letters forming another word, -letter following the word just read)
     readLetters(Letter, LetterList, AnotherLetter),
-    name(Word, LetterList),
+    name(Word, LetterList), % form a word from letters
     readRest(AnotherLetter,WordList).
     
 %readSentence(-listOfWordsInASentence)
 %read sentense from input, casts all words to lower case and stores them in WordList
+% I convert everything to lower case, cause I dont want user input to get misinterpreted as variables
 readSentence(WordList):-
     get(Char),  %read the first letter
     charToLowerCase(Char,LowChar),
     readRest(LowChar,WordList).
 
+% converts char represented by it ascii code to lower case
 charToLowerCase(In,Out):-
     In >= 65,
     In =< 90,
     Out is In + 32.
 charToLowerCase(In,In).
 
+% numsToString(+String that may contain some digits, -String that does not)
+% converts all digit in the input string to their string repesentation
+% I use digit to match parts of user input, I dont want digits in input to be misinterpreted for my internal matching patterns 
 numsToString([X|Input], [Y|Output]):-
     integer(X),
     number_string(X, Y),
@@ -54,6 +63,7 @@ numsToString([X|Input], [X|Output]):-
     numsToString(Input,Output).
 numsToString([],[]).
 
+% read sentence from stdin and converts all digits to their string representation
 readSentenceCastingNumbers(WordListCasted):-
     readSentence(WordList),
     numsToString(WordList, WordListCasted).
@@ -64,6 +74,11 @@ readSentenceCastingNumbers(WordListCasted):-
     wordListToLowerCase(InputList, LowerCaseList).
 wordListToLowerCase([],[]).*/
 %%%%%%%%%%%%%%%%%%%%%%SIMPLIFICATION OF INPUT %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% extremely handy tool for matching user input
+% allows Eliza to transform pronouns to make more natural answers (me->you etc.)
+% also transforms some words with similar meaning to keyWords, allowing to minimaze a set of keywords
+
 %simplificationRule([before], [after], restBefore, restAfter)
 simplificationRule([do,not|X],[dont|Y],X,Y).
 simplificationRule([can,not|X],[cant|Y],X,Y).
@@ -110,7 +125,10 @@ simplificationRule([my|X],[your|Y],X,Y).
 simplificationRule([everybody|X],[everyone|Y],X,Y).
 simplificationRule([nobody|X],[everyone|Y],X,Y).
 simplificationRule([noone|X],[everyone|Y],X,Y).
+simplificationRule([cause|X],[because|Y],X,Y).
+simplificationRule([coz|X],[because|Y],X,Y).
 
+% iterates thru input list translating words according to simplification rules
 simplify(Input, Result):-
     simplificationRule(Input,Result,X,Y),
     !,
@@ -121,7 +139,9 @@ simplify([],[]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% DATABASE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+% words for which Eliza has a response patterns
+% if no is found in input sentence, 'none' is used instead of a keyword
+% the lower priority the more important key word
 %keyword(keyword, priority)
 %database of keywords
 keyword(abraka, 10).
@@ -287,6 +307,9 @@ prepareScript():-
     
     
 %DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS
+
+%response(+keyword,+number of pattern, -list of answer patterns, +additional info)
+% SPECIAL PATTERN FOR RESPONSES EXTRACTED FROM A MEMORY
 response(mem,1,[
     [lets,discuss,further,why,1,'.'],
     [earlier,you,said,1,'.'],
@@ -778,7 +801,8 @@ getResponse(KeyWord,Input,Response):-
     %create response from response pattern and KeyValList
     match(ResponsePattern,KeyValList,Response),!.
 
-
+% fills KeyValList with words matched from input sentense
+% or uses filled KeyValList to match words to response pattern
 match([Word|Pattern], KeyValList, [Word|WordList]):-
     atom(Word),
     match(Pattern, KeyValList, WordList).
@@ -789,7 +813,6 @@ match([N|Pattern], KeyValList, WordList):-
     match(Pattern, KeyValList, Right).
 match([],_,[]).
     
-
 findKeyValue(Key, [Key-Value|_],Value). %found
 findKeyValue(Key, [Key1-_|KeyValList], Value):-
     Key \= Key1, %not found yet
@@ -817,14 +840,18 @@ findMostImportantKeyWord([_|List], BestSoFar, Res):-
 
 %%%%%%%%%%%%%%%%%%%%%% PRINTING REPLY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% converts the first letter of the word to upper case
+% used for the first word of the response
 firstCharUpper(LowerWord, UpperWord):-
-    atom_chars(LowerWord, [FirstChar|CharList]),
-    atom_chars(FirtsCharAsAtom, [FirstChar]),
-    upcase_atom(FirtsCharAsAtom, FirtsCharAsAtomUpper),
-    atom_chars(FirtsCharAsAtomUpper,[UpperChar]),
-    atom_chars(UpperWord,[UpperChar|CharList]),!.
+    atom_chars(LowerWord, [FirstChar|CharList]), % get the first letter of an atom as a char
+    atom_chars(FirtsCharAsAtom, [FirstChar]), % convert char back to atom
+    upcase_atom(FirtsCharAsAtom, FirtsCharAsAtomUpper), % convert atomLettet to upper case
+    atom_chars(FirtsCharAsAtomUpper,[UpperChar]), % convert upper atom back to char
+    atom_chars(UpperWord,[UpperChar|CharList]),!. % put upper letter back to the beggining of the word a convert word back to atom
 firstCharUpper(NoChange, NoChange). % to prevent whole Eliza from failing, when unable to convert letter to Upper case
-    
+ 
+% convert the first letter the firts word of the response sentence to upper case
+% and print the response    
 reply([H|T]):-
     firstCharUpper(H,UH),
     printReply([UH|T]).
@@ -842,18 +869,23 @@ printReply([]):- nl.
 tryFindImportant([Word|_],Word):-important(Word),!.
 tryFindImportant([_|List],Word):-tryFindImportant(List,Word).
 
+% getMemoryResponse(+ImportantWord, +simplified input list, -Response)
+% checks wether there is something in a memery for a given important word
+% if so, extract it from memory, uses to build a response and remembers Simplified for given Important word instead
+% if no, remembers Simplified and forms an ordinary response
 getMemoryResponse(Important,Simplified,Response):-
     % something in mem for Important
     mem(Important,SenFromMem), %should fail when there is nothing in mem from given important word yet
-    getResponse(mem,SenFromMem,Response),
-    retract(mem(Important,SenFromMem)),
-    asserta(mem(Important,Simplified)),!.
+    getResponse(mem,SenFromMem,Response), % use special mem keyword and sentence from a memory to form a response
+    retract(mem(Important,SenFromMem)), % forget
+    asserta(mem(Important,Simplified)),!. % remember
 getMemoryResponse(Important,Simplified,Response):-
     % nothing in mem for Important yet
     findMostImportantKeyWord(Simplified, _, KeyWord),
-    getResponse(KeyWord,Simplified,Response),
-    asserta(mem(Important,Simplified)).
-    
+    getResponse(KeyWord,Simplified,Response), % ordinary response
+    asserta(mem(Important,Simplified)). % remeber
+
+% words Eliza remembers something about    
 important(X):-family(X).
 important(X):-closeOne(X).
 important(hate).
@@ -866,14 +898,14 @@ important(X):-day(X).
 eliza:-
     write('Hello, I am Eliza. What is bothering you?'),
     nl,
-    prepareScript(),
+    prepareScript(), 
     readSentenceCastingNumbers(Sentence),
     eliza(Sentence),!.
 
-eliza(Sentence):-
-    member('bye', Sentence),!,
+eliza(Sentence):- %quit
+    member('bye', Sentence),!, 
     write('Thanks for a chat. If I don\'t se you around, I will see you square.'),!.
-eliza(Sentence):-
+eliza(Sentence):- % work with memory 
     simplify(Sentence,Simplified),
     tryFindImportant(Simplified,Important),% +-cut? % should fail when no important found
     getMemoryResponse(Important,Simplified,Response),
@@ -881,7 +913,7 @@ eliza(Sentence):-
     readSentenceCastingNumbers(AnotherSentence),
     !,
     eliza(AnotherSentence).
-eliza(Sentence):-
+eliza(Sentence):- % ordinary response
     simplify(Sentence, Simplified),
     findMostImportantKeyWord(Simplified, _, KeyWord),
     getResponse(KeyWord, Simplified, Response),
@@ -919,8 +951,6 @@ testKeyWordLookUp(KeyW):-
     %wordListToLowerCase(Sen, LowerCaseList),
     findMostImportantKeyWord(Sen,_,KeyW ).
 
-%testListLower(LowerCaseList):-
-%    readSentence(Sen), wordListToLowerCase(Sen, LowerCaseList).
 
 
 
