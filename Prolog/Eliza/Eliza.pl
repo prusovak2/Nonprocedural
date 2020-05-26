@@ -152,10 +152,12 @@ keyword(you, 30).
 keyword(i,30).
 keyword(youre,31).
 keyword(im,31).
+keyword(eliza,33).
 
 
 %pattern(keyword,question pattern, pattern Id)
 %to match keyWords to corresponding question patterns
+%whats matched by high numbers (73,42..) is not used in the answer 
 pattern(language,[1], 1,_).
 pattern(remember,[73,you,remember,1], 1,_).
 pattern(remember,[73,do,i,remember,1], 2, _).
@@ -212,12 +214,17 @@ pattern(perhaps,[73],1,_).
 pattern(name,[73,my,name,42],1,_).
 pattern(name,[73],2,_).
 pattern(hello,[73],1,_).
+pattern(eliza,[73],1,_).
+pattern(mem,[1],1,_).
 
 
 :-dynamic toUse/3.
+:-dynamic mem/2.
+
 prepareScript():-
-    %delete last used phraze memory from previous run
+    %delete memory from previous run
     retractall(toUse(_,_,_)),
+    retractall(mem(_,_)),
     %initialize memory to start with the first variant of the response pattern
     assertz(toUse(language,1,0)),
     assertz(toUse(remember,1,0)),
@@ -274,11 +281,19 @@ prepareScript():-
     assertz(toUse(perhaps,1,0)),
     assertz(toUse(name,1,0)),
     assertz(toUse(name,2,0)),
-    assertz(toUse(hello,1,0)).
-
-
+    assertz(toUse(hello,1,0)),
+    assertz(toUse(eliza,1,0)),    
+    assertz(toUse(mem,1,0)).
     
-%DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS 
+    
+%DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS
+response(mem,1,[
+    [lets,discuss,further,why,1,'.'],
+    [earlier,you,said,1,'.'],
+    [but,1,?],
+    [does,that,have,anything,to,do,with,the,fact,that,1,?]
+],_).
+
 % _ I remember 1
 response(remember, 1, [
     [do,you,often,think,of,1,?],
@@ -485,7 +500,7 @@ response(you,6,[
 ],X).
 % _ you _
 response(you,7,[
-    [you,say,1],
+    [you,say,1,'.'],
     [can,you,elaborate,on,that,?],
     [do,you,say,1,for,some,special,reason,?],
     [that,is,quite,interesting,'.']
@@ -676,6 +691,10 @@ response(name,2,[
 response(hello,1,[
     [hi,',',whats,up,?]
 ],_).
+% _ eliza _
+response(eliza,1,[
+    [yes,',',thats,me,'.']
+],_).
 
 % WORD CLASSES - groups of words similar in some way, that fit in the same places in sentences
 pronoun(they).
@@ -726,7 +745,13 @@ everyone(everybody).
 everyone(nobody).
 everyone(noone).
 
-
+day(sunday).
+day(monday).
+day(tuesday).
+day(wednesday).
+day(thursday).
+day(friday).
+day(saturday).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%% ANSWER BUILDING LOGIC %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -808,7 +833,34 @@ printReply([H|T]):-
     write(H),
     write(' '),
     printReply(T).
-printReply([]):- nl. 
+printReply([]):- nl.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MEMORY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%tryFindImportant(+Sentence,-ImportantWord)
+% returns the first important word as Word, failes if no important word is present
+tryFindImportant([Word|_],Word):-important(Word),!.
+tryFindImportant([_|List],Word):-tryFindImportant(List,Word).
+
+getMemoryResponse(Important,Simplified,Response):-
+    % something in mem for Important
+    mem(Important,SenFromMem), %should fail when there is nothing in mem from given important word yet
+    getResponse(mem,SenFromMem,Response),
+    retract(mem(Important,SenFromMem)),
+    asserta(mem(Important,Simplified)),!.
+getMemoryResponse(Important,Simplified,Response):-
+    % nothing in mem for Important yet
+    findMostImportantKeyWord(Simplified, _, KeyWord),
+    getResponse(KeyWord,Simplified,Response),
+    asserta(mem(Important,Simplified)).
+    
+important(X):-family(X).
+important(X):-closeOne(X).
+important(hate).
+important(love).
+important(climbing).
+important(birthday).
+important(X):-day(X).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN LOOP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eliza:-
@@ -821,6 +873,14 @@ eliza:-
 eliza(Sentence):-
     member('bye', Sentence),!,
     write('Thanks for a chat. If I don\'t se you around, I will see you square.'),!.
+eliza(Sentence):-
+    simplify(Sentence,Simplified),
+    tryFindImportant(Simplified,Important),% +-cut? % should fail when no important found
+    getMemoryResponse(Important,Simplified,Response),
+    reply(Response),
+    readSentenceCastingNumbers(AnotherSentence),
+    !,
+    eliza(AnotherSentence).
 eliza(Sentence):-
     simplify(Sentence, Simplified),
     findMostImportantKeyWord(Simplified, _, KeyWord),
