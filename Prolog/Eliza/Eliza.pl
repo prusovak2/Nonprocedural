@@ -71,12 +71,15 @@ simplificationRule([cannot|X],[cant|Y],X,Y).
 simplificationRule([can,'\'',t|X],[cannot|Y],X,Y).
 simplificationRule([don,'\'',t|X],[dont|Y],X,Y).
 simplificationRule([will,not|X],[wont|Y],X,Y).
-simplificationRule([dreamed|X],[dreamt|Y],X,Y).
+simplificationRule([dreamed|X],[dream|Y],X,Y).
 simplificationRule([dreams|X],[dream|Y],X,Y).
+simplificationRule([dreamt|X],[dream|Y],X,Y).
 simplificationRule([how|X],[what|Y],X,Y).
 simplificationRule([when|X],[what|Y],X,Y).
-simplificationRule([alike|X],[dit|Y],X,Y).
-simplificationRule([same|X],[dit|Y],X,Y).
+simplificationRule([alike|X],[similar|Y],X,Y).
+simplificationRule([same|X],[similar|Y],X,Y).
+simplificationRule([resemble|X],[similar|Y],X,Y).
+simplificationRule([remind,me,of|X],[similar|Y],X,Y).
 simplificationRule([certainly|X],[yes|Y],X,Y).
 simplificationRule([maybe|X],[perhaps|Y],X,Y).
 simplificationRule([deutsch|X],[language|Y],X,Y).
@@ -90,11 +93,11 @@ simplificationRule([machines|X],[computer|Y],X,Y).
 simplificationRule([computers|X],[computer|Y],X,Y).
 simplificationRule([am|X],[are|Y],X,Y).
 simplificationRule([your|X],[my|Y],X,Y).
-simplificationRule([were|X],[was|Y],X,Y).
+%simplificationRule([were|X],[was|Y],X,Y).
 simplificationRule([me|X],[you|Y],X,Y).
-%simplificationRule([are,you|X],['i\'m'|Y],X,Y). %maybe incorrect
-simplificationRule([you,'\'',re|X],['i\'m'|Y],X,Y).
-simplificationRule([you,are|X],['i\'m'|Y],X,Y).
+simplificationRule([you,'\'',re|X],[im|Y],X,Y).
+simplificationRule([you,are|X],[im|Y],X,Y).
+simplificationRule([youre|X],[im|Y],X,Y).
 simplificationRule([i,'\'',m|X],['you\'re'|Y],X,Y).     
 simplificationRule([i,am|X],[youre|Y],X,Y).      
 simplificationRule([myself|X],[yourself|Y],X,Y).
@@ -106,6 +109,7 @@ simplificationRule([you|X],[i|Y],X,Y).
 simplificationRule([my|X],[your|Y],X,Y).
 simplificationRule([everybody|X],[everyone|Y],X,Y).
 simplificationRule([nobody|X],[everyone|Y],X,Y).
+simplificationRule([noone|X],[everyone|Y],X,Y).
 
 simplify(Input, Result):-
     simplificationRule(Input,Result,X,Y),
@@ -124,15 +128,30 @@ keyword(abraka, 10).
 keyword(computer, 10).
 keyword(language, 11).
 keyword(because, 18).
+keyword(if,18).
+keyword(hello, 19).
 keyword(remember, 20).
-keyword(are, 24).
-keyword(can,24).
-keyword(what, 24).
-keyword(why, 24).
+keyword(always, 20).
+keyword(everyone, 20).
+keyword(dream,20).
+keyword(name,20).
+keyword(sorry,20).
+keyword(are, 22).
+keyword(was, 22).
+keyword(were, 22).
+keyword(can,22).
+keyword(what, 22).
+keyword(similar,23).
+keyword(perhaps,23).
+keyword(why, 23).
 keyword(my, 25).
+keyword(your,25).
 keyword(yes, 25).
 keyword(no, 25).
-keyWord(you, 30).
+keyword(you, 30).
+keyword(i,30).
+keyword(youre,31).
+keyword(im,31).
 
 
 %pattern(keyword,question pattern, pattern Id)
@@ -163,7 +182,36 @@ pattern(you,[73,you,cant,1], 1,_).
 pattern(you,[73,you,dont,1], 2,_).
 pattern(you,[73,you,feel,1], 3,_).
 pattern(you,[73,you,1,i,42], 4,_).
-
+pattern(you,[73,you,X,1], 5,X):- desire(X).
+pattern(you,[73,you,X,youre,1], 6, X):- think(X).
+pattern(you,[1], 7,_).
+pattern(youre,[73,youre,42,X,88], 1,X):-unhappy(X).
+pattern(youre,[73,youre,42,X,88], 2,X):-happy(X).
+pattern(youre,[73,youre,1], 3,_).
+pattern(youre,[1], 4,_).
+pattern(similar,[73], 1,_).
+pattern(im,[73,im,1], 1,_).
+pattern(i,[73,i,1,you], 2,_).
+pattern(i,[73,i,1], 3,_).
+pattern(was,[73,was,you,1],1,_).
+pattern(was,[73,you,was,1],2,_).
+pattern(was,[73], 3,_).
+pattern(were,[73,were,i,1], 1,_).
+pattern(were,[73], 2,_).
+pattern(your,[73,your,42,X,1],1,X):-family(X).
+pattern(your,[73,your,42,X,1],2,X):-closeOne(X).
+pattern(your,[73,your,1],3,_).
+pattern(your,[73],4,_).
+pattern(everyone,[73,X,42],1,X):-everyone(X).
+pattern(always,[73],1,_).
+pattern(sorry,[73],1,_).
+pattern(if,[73,if,1],1,_).
+pattern(dream,[73,you,dream,1],1,_).
+pattern(dream,[73],2,_).
+pattern(perhaps,[73],1,_).
+pattern(name,[73,my,name,42],1,_).
+pattern(name,[73],2,_).
+pattern(hello,[73],1,_).
 
 
 :-dynamic toUse/3.
@@ -192,7 +240,43 @@ prepareScript():-
     assertz(toUse(can,2,0)),
     assertz(toUse(why,1,0)),
     assertz(toUse(why,2,0)),
-    assertz(toUse(why,3,0)).
+    assertz(toUse(why,3,0)),
+    assertz(toUse(you,1,0)),
+    assertz(toUse(you,2,0)),
+    assertz(toUse(you,3,0)),
+    assertz(toUse(you,4,0)),
+    assertz(toUse(you,5,0)),
+    assertz(toUse(you,6,0)),
+    assertz(toUse(you,7,0)),
+    assertz(toUse(youre,1,0)),
+    assertz(toUse(youre,2,0)),
+    assertz(toUse(youre,3,0)),
+    assertz(toUse(youre,4,0)),
+    assertz(toUse(similar,1,0)),
+    assertz(toUse(im,1,0)),
+    assertz(toUse(i,2,0)),
+    assertz(toUse(i,3,0)),
+    assertz(toUse(was,1,0)),
+    assertz(toUse(was,2,0)),
+    assertz(toUse(was,3,0)),
+    assertz(toUse(were,1,0)),
+    assertz(toUse(were,2,0)),
+    assertz(toUse(your,1,0)),
+    assertz(toUse(your,2,0)),
+    assertz(toUse(your,3,0)),
+    assertz(toUse(your,4,0)),
+    assertz(toUse(everyone,1,0)),
+    assertz(toUse(always,1,0)),
+    assertz(toUse(sorry,1,0)),
+    assertz(toUse(if,1,0)),
+    assertz(toUse(dream,1,0)),
+    assertz(toUse(dream,2,0)),
+    assertz(toUse(perhaps,1,0)),
+    assertz(toUse(name,1,0)),
+    assertz(toUse(name,2,0)),
+    assertz(toUse(hello,1,0)).
+
+
     
 %DATABASE OF RESPONSE PATTERNS CORRESPONDING TO KEYWORDS 
 % _ I remember 1
@@ -357,15 +441,16 @@ response(why,2,[
 response(why,3,[
     [why,not,?]
 ],_).
-
+% _ I cant 1
 response(you,1,[
     [how,do,you,know,you,can,not,1,?],
     [have,you,tried,?],
     [perhaps,you,could,1,now,?],
     [do,you,really,want,to,be,able,to,1,?]
 ],_).
+% _ I dont 1
 response(you,2,[
-    [do,you,not,really,1,?],
+    [do,you,really,not,1,?],
     [why,do,you,not,1,?],
     [do,you,wish,to,be,able,to,1,?],
     [does,that,trouble,you,?]
@@ -375,51 +460,271 @@ response(you,3,[
     [do,you,often,feel,1,?],
     [do,you,enjoy,feeling,1,?],
     [of,what,does,feeling,1,remind,you,?]
-],_).        
+],_).
+% _ I 1 you _       
 response(you,4,[
     [perhaps,in,your,fantasy,we,1,each,other,?],
     [do,you,wish,to,1,me,?],
     [you,seem,to,need,to,1,me,'.'],
     [do,you,1,anyone,else,?]
 ],_).
-response(you,5,[_,you,[*,want,need,_],Y],0,
-		[what,would,it,mean,to,you,if,you,got,Y,?],
-		[why,do,you,want,Y,?],
-		[suppose,you,got,Y,soon,?],
-		[what,if,you,never,got,Y,?],
-		[what,would,getting,Y,mean,to,you,?],
-		[what,does,wanting,Y,have,to,do,with,this,discussion,?]],
-	[7,[_,you,[*,feel,think,believe,wish,_],you,Y],0,
-		[do,you,really,think,so,?],
-		[but,you,are,not,sure,you,Y,?],
-		[do,you,really,doubt,you,Y,?]],
-        [8,[_,you,_,[*,feel,think,believe,wish,_],_,i,_],0,
-		[equal,[you,0]]],
-	[9,[_,youre,_,[*,sad,unhappy,depressed,sick,M],_],0,
-		['I',am,sorry,to,hear,you,are,M,.],
-		[do,you,think,coming,here,will,help,you,not,to,be,M,?],
-		['I',am,sure,it,is,not,pleasant,to,be,M,.],
-		[can,you,explain,what,made,you,M,?]],
-	[10,[_,youre,_,[*,happy,elated,glad,better,M],_],0,
-		[how,have,'I',helped,you,to,be,M,?],
-		[has,your,treatment,made,you,M,?],
-		[what,makes,you,M,just,now,?],
-		[can,you,explain,why,you,are,suddenly,M,?]],
-	[11,[_,youre,Y],0,
-		[is,it,because,you,are,Y,that,you,came,to,me,?],
-		[how,long,have,you,been,Y,?],
-		[do,you,believe,it,normal,to,be,Y,?],
-		[do,you,enjoy,being,Y,?]],
-	[12,[X],0,
-		[you,say,X],
-		[can,you,elaborate,on,that,?],
-		[do,you,say,X,for,some,special,reason,?],
-		[that,is,quite,interesting,.]]]]).
-
+% _ I desire() 1
+response(you,5,[
+    [what,would,it,mean,to,you,if,you,got,1,?],
+    [why,do,you,want,1,?],
+    [suppose,you,got,1,soon,?],
+    [what,if,you,never,got,1,?],
+    [what,would,getting,1,mean,to,you,?],
+    [what,does,wanting,1,have,to,do,with,this,discussion,?]
+],_).
+% I think() I 1
+response(you,6,[
+    [do,you,really,X,so,?],
+    [but,you,are,not,sure,you,are,1,?],
+    [do,you,really,doubt,you,are,1,?]
+],X).
+% _ you _
+response(you,7,[
+    [you,say,1],
+    [can,you,elaborate,on,that,?],
+    [do,you,say,1,for,some,special,reason,?],
+    [that,is,quite,interesting,'.']
+],_).
+% I am unhappy()
+response(youre,1,[
+    ['I',am,sorry,to,hear,you,are,X,'.'],
+    [do,you,think,coming,here,will,help,you,not,to,be,X,?],
+    ['I',am,sure,it,is,not,pleasant,to,be,X,'.'],
+    [can,you,explain,what,made,you,X,?]
+],X).
+% I am happy()
+response(youre,2,[
+    [how,have,'I',helped,you,to,be,X,?],
+    [has,your,treatment,made,you,X,?],
+    [what,makes,you,X,just,now,?],
+    [can,you,explain,why,you,are,suddenly,X,?]
+],X).
+% I am 1
+response(youre,3,[
+    [is,it,because,you,are,1,that,you,came,to,me,?],
+    [how,long,have,you,been,1,?],
+    [do,you,believe,it,normal,to,be,1,?],
+    [do,you,enjoy,being,1,?]
+],_).
+% I am _
+response(youre,4,[
+    [you,say,1,'.'],
+    [can,you,elaborate,on,that,?],
+    [do,you,say,1,for,some,special,reason,?],
+    [that,is,quite,interesting,'.']
+],_).
+% _ similar/same/alike/resemble/remind me
+response(similar,1,[
+    [in,what,way,?],
+    [what,resemblance,do,you,see,?],
+    [what,does,that,similarity,suggest,to,you,?],
+    [what,other,connections,do,you,see,?],
+    [what,so,you,suppose,that,resemblance,means,?],
+    [what,is,the,connection,',',do,you,suppose,?],
+    [could,there,really,be,some,connection,?],
+    [how,?]
+],_).
+% _ you are 1
+response(im, 1,[
+    [what,makes,you,think,'I',am,1,?],
+    [does,it,please,you,to,believe,'I',am,1,?],
+    [do,you,sometimes,wish,you,were,1,?],
+    [perhaps,you,would,like,to,be,1,?]
+],_).
+% _ you 1 me
+response(i,2,[
+    [why,do,you,think,'I',1,you,?],
+    [you,like,to,think,'I',1,you,',','don\'t', you,?],
+    [what,makes,you,think,'I',1,you,?],
+    [really,',','I',1,you,'.'],
+    [do,you,wish,to,believe,'I',1,you,?],
+    [suppose,'I',did,1,you,',',what,would,that,mean,to,you,?],
+    [does,someone,else,believe,'I',1,you,?]
+],_).
+% _ you 1
+response(i,3,[
+    [we,were,discussing,you,',',not,me,'.'],
+    [oh,',',i,1,'.'],
+    [you,are,not,really,talking,about,me,',',are,you,?],
+    [what,are,your,feelings,now,?]
+],_).
+% was I 1
+response(was,1,[
+    [what,if,you,were,1,?],
+    [do,you,think,you,were,1,?],
+    [were,you,1,?],
+    [what,would,it,mean,if,you,were,1,?],
+    [what,does,1,suggest,to,you,?]
+],_).
+% I was 1
+response(was,2,[
+    [were,you,really,?],
+    [why,do,you,tell,me,you,were,1,just,now,?],
+    [perhaps,'I',already,knew,you,were,1,'.']
+],_).
+% _ was _
+response(was,3,[
+    [was,it,really,?]
+],_).
+% _ were you 1
+response(were,1,[
+    [would,you,like,to,believe,'I',was,1,?],
+    [what,suggests,that,'I',was,1,?],
+    [what,do,you,think,?],
+    [perhaps,'I',was,1,'.'],
+    [what,if,'I',had,been,1,?]
+],_).
+% _ were _
+response(were,2,[
+    ['don\'t',you, think,so,?]
+],_).
+% _ my _ family() 1
+response(your,1,[
+    [tell,me,more,about,your,family,'.'],
+    [who,else,in,your,family,1,?],
+    [your,X,?],
+    [what,else,comes,to,mind,when,you,think,of,your,X,?]
+],X).
+% _ my _ closeOne() 1
+response(your,2,[
+    [tell,me,more,about,people,around,you,'.'],
+    [who,else,you,know,1,?],
+    [your,X,?],
+    [what,else,comes,to,mind,when,you,think,of,your,X,?]
+],X).
+% _ my 1
+response(your,3,[
+    [your,1,?],
+    [what,can,you,tell,me,about,your,1,?],
+    [does,that,suggest,anything,else,which,belongs,to,you,?],
+    [is,your,1,important,to,you,?]
+],_).
+% _ my _
+response(your,4,[
+    [your,what,?]
+],_).
+% _ everyone/everybody/nobody/noone _
+response(everyone,1,[
+    [really,',',X,?],
+    [can,you,think,of,anyone,in,particular,?],
+    [who,',',for,example,?],
+    [who,',',may,'I',ask,?],
+    [someone,special,perhaps,?],
+    [you,have,a,paticular,person,in,mind,',',do,you,not,?],
+    [who,do,you,think,you,are,talking,about,?],
+    [it,seem,like,unnecessary,generalization,'.']
+],X).
+% _ always _
+response(always,1,[
+    [can,you,think,of,a,specific,example,?],
+    [when,?],
+    [what,incident,are,you,thinking,of,?],
+    [really,',',always,?]
+],_).
+% _ sorry _
+response(sorry,1,[
+    [please,do,not,apologize,'.'],
+    [apologies,are,not,necessary,'.'],
+    [what,feelings,do,you,have,when,you,apologize,?],
+    ['I',have,told,you,that,apologies,are,not,required,'.']
+],_).
+% _ if 1
+response(if,1,[ 
+    [do,you,think,it,is,likely,that,1,?],
+    [do,you,wish,that,1,?],
+    [what,do,you,think,about,1,?],
+    [really,',',if,1,?]
+],_).
+% _ I dream 1
+response(dream,1,[
+    [really,',',1,?],
+    [have,you,ever,fantasied,1,while,you,were,awake,?],
+    [have,you,dreamt,1,before,?]
+],_).
+% _ dream _
+response(dream,2,[
+    [what,does,that,dream,suggest,to,you,?],
+    [do,you,dream,often,?],
+    [what,persons,appear,in,your,dreams,?],
+    [do,you,believe,that,dreaming,has,something,to,do,with,your,problem,?]
+],_).
+% _ perhaps _
+response(perhaps,1,[
+    [you,do,not,seem,quite,certain,'.'],
+    [why,the,uncertain,tone,?],
+    [can,you,not,be,more,positive,?],
+    [you,are,not,sure,?],
+    [do,you,not,know,?]
+],_).
+% _ your name
+response(name,1,[
+    [my,name,is,'Eliza','.'],
+    [stop,asking,about,my,name,!]
+],_).
+% _ name _
+response(name,2,[
+    ['I',am,not,interested,in,names,'.'],
+    ['I',have,told,you,before,',','I',do,not,care,about,names,'.'],
+    [please,continue,',']
+],_).
+% _ hello _
+response(hello,1,[
+    [hi,',',whats,up,?]
+],_).
 
 % WORD CLASSES - groups of words similar in some way, that fit in the same places in sentences
 pronoun(they).
 pronoun(we).
+
+desire(want).
+desire(need).
+desire(crave).
+desire(desire).
+desire(wish).
+
+think(think).
+think(hope).
+think(recon).
+think(belive).
+think(wish).
+think(belive).
+think(suppose).
+
+unhappy(unhappy).
+unhappy(sad).
+unhappy(depressed).
+unhappy(sick).
+unhappy(exasperated).
+
+happy(happy).
+happy(glad).
+happy(better).
+happy(satisfied).
+happy(cheerful).
+happy(pleased).
+
+family(mother).
+family(father).
+family(brother).
+family(sister).
+family(children).
+family(wife).
+family(husband).
+
+closeOne(girlfriend).
+closeOne(boyfriend).
+closeOne(friend).
+closeOne(belayer).
+
+everyone(everyone).
+everyone(everybody).
+everyone(nobody).
+everyone(noone).
 
 
 
@@ -515,7 +820,7 @@ eliza:-
 
 eliza(Sentence):-
     member('bye', Sentence),!,
-    write('Thanks for a chat. If I don\'t se you around, I will see you square.').
+    write('Thanks for a chat. If I don\'t se you around, I will see you square.'),!.
 eliza(Sentence):-
     simplify(Sentence, Simplified),
     findMostImportantKeyWord(Simplified, _, KeyWord),
