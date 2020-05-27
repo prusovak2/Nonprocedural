@@ -107,13 +107,23 @@ Některé vstupní vzory budou namatchovány  pouze, obsahuje-li vstupní věta 
 
 ### Paměť
 
+Eliza implementuje jednoduchou paměť. Pokud uživatel použije slovo, pro které je splněn predikát `important`, predikát `tryFindImportant` v druhé klauzuli `Eliza/1` uspěje a místo predikátu `getResponse` se použije `getMemoryResponse`. Tento predikát zkontroluje, zda je v programu již přítomna klauzule predikátu `mem(ImportantWord,SentenceInMemory)` s prvním argumentem odpovídajícím danému důležitému slovu. Pokud ano, je zapamatovaná věta vyjmuta z paměti (`retract`), použita v odpovědi (namatchovaná na speciální `response` pattern `mem`) a pro dané klíčové slovo je nově zapamatována věta, kterou uživatel právě zadal (`assert`). Jinak je věta pouze zapamatována a je zformulována standartní odpověď (`getResponse`). Eliza bere v potaz první důležité slovo, co se ve větě vyskytuje.
 
+```Prolog
+important(X):-family(X).
+important(X):-closeOne(X).
+important(hate).
+important(love).
+important(climbing).
+important(birthday).
+important(X):-day(X).
+```
 
-### Výpis výstupu
+###Výpis výstupu
 
 Na predikátu `reply`, která vypíše vybudovanou větu na výstup není nic pozoruhodného, snad jen že převede první písmeno prvního slova věty do upper case. To umožňuje vkládat části uživatelem napsané věty (jejíž všechna písmena byla při parsování převedena do lower case) i na začátek vybudované odpovědi bez újmy na tom, že každá slušná věta začíná velkým písmenem. Navíc to zbavuje mou programátorskou maličkost nutnosti kontrolovat, zda každý z nemála vzorů odpovědi začíná velkým písmenem.  
 
-
+##Uživatelská dokumentace
 
 
 
