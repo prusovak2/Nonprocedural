@@ -1,10 +1,10 @@
-#Eliza 
+# Eliza 
 Cílem zápočtového programu bylo v programovacím jazyce `Prolog` naimplementovat program `Eliza`, který se prostřednictvím pattern matchingu a substituce pokouší simulovat co nejpřirozenější konverzaci, aniž by znal význam uživatelem psaných slov.  Součástí zadání bylo, aby `Eliza` disponovala širokou paletou vzorů odpovědí, mezi kterými umí plynule střídat a aby implementovala jednoduchou paměť, do které si ukládá některé vstupy uživatele obsahující významná slova. Obsah této paměti následně umí použít v odpovědi.
 
 První `Eliza` byla napsána v letech 1964 -1966 profesorem Josephem Weizenbaumem a byla pojmenována dle postavy Eliza Doolittle z komedie George Bernanda Shawna Pygmalion.
 																																*[Wikipedie]*
 
-##Implementace
+## Implementace
 
 Predikáty programu lze z dle účelu pomyslně rozdělit do tří částí. První podmnožina z nich se stará o parsování vstupu, druhá implementuje logiku, odpovědnou za formulaci odpovědi pro uživatele a třetí odpověď vypíše na výstup. Nebudu zde do detailu rozebírat účel a fungování každého jednotlivého predikátu, neboť tento účel už plní komentáře ve zdrojovém kódu. Shrnu raději princip fungování jednotlivých částí programu a pozastavím se nad zajímavými implementačními detaily.
 
@@ -43,7 +43,7 @@ simplificationRule([you,'\'',re|X],[im|Y],X,Y).
 simplificationRule([myself|X],[yourself|Y],X,Y).
 simplificationRule([yourself|X],[myself|Y],X,Y).
 ```
-####Nalezení klíčových slov
+#### Nalezení klíčových slov
 Klíčovými slovy míním slova, pro která `Eliza` disponuje nějakou sadou vzorů odpovědí. Pokud žádné takové není ve větě nalezeno, je použito speciální  `none`. Důležitá slova  (označená predikátem `important`) naproti tomu souvisí s implementací jednoduché paměti a bude o nich zmínka později. 
 
 Každé klíčové slovo je označeno predikátem `keyword(keyword, priority)`.  Za nalezení klíčových slov odpovídá predikát `findMostImportantKeyWord`, jež vrátí klíčové slovo s nejnižší prioritou, které ve větě nalezne, nebo `none`. Tento predikát je naimplementován metodou **akumulátoru**, kde druhý argument slouží jako akumulátor, ve kterém je předáváno zatím nejlepší nalezené klíčové slovo.
@@ -55,7 +55,7 @@ findMostImportantKeyWord([],Res,Res):- nonvar(Res),!. %return keyWord found - Re
 findMostImportantKeyWord([],_,none). %no key word present in WordList
 ```
 
-####Predikát `getResponse`
+#### Predikát `getResponse`
 
 Za celý zbytek procesu budování odpovědi zodpovídá predikát `getResponse`. Ten dostane klíčové slovo a zjednodušenou vstupní větu. Tu postupně zkusí napasovat na všechny vzory vstupní věty příslušné danému klíčovému slovu. To provede pomocí predikátu `match`, jež naplní asociativní slovník slovy ze vstupní věty oindexovanými čísly v příslušném vstupním vzoru, se kterými byla slova *'zunifikována'* . Vzory vstupní věty reprezentuje predikát `pattern(Keyword,Pattern,PatternId, AdditionalInfo)`. Každý vstupní vzor má své `Id`, které je jedinečné v rámci vzorů příslušných jednomu klíčovému slovu a slouží k mapování mezi vstupními a výstupními vzory.
 
@@ -119,11 +119,11 @@ important(birthday).
 important(X):-day(X).
 ```
 
-###Výpis výstupu
+### Výpis výstupu
 
 Na predikátu `reply`, která vypíše vybudovanou větu na výstup není nic pozoruhodného, Za zmínku stojí snad jen, že převede první písmeno prvního slova věty do upper case. To umožňuje vkládat části uživatelem napsané věty (jejíž všechna písmena byla při parsování převedena do lower case) i na začátek vybudované odpovědi bez újmy na tom, že každá slušná věta začíná velkým písmenem. Navíc to zbavuje mou programátorskou maličkost nutnosti kontrolovat, zda každý z nemála vzorů odpovědi začíná velkým písmenem.  
 
-##Uživatelská dokumentace
+## Uživatelská dokumentace
 
 Program lze spustit příkazem **eliza**.  Poté může uživatel zadávat libovolné věty v angličtině a `Eliza` na ně bude více či méně trefně odpovídat. Je třeba zadat vždy právě jednu větu a ukončit ji **tečkou**, **otazníkem** či **vykřičníkem**. Pro ukončení konverzace s `Elizou` stačí zadat větu obsahující slovo **bye**.
 Z povahy zadání mi nepřijde smysluplné uvádět množinu testovacích dat. Každá anglická věta je validním vstupem. Přikládám místo toho příklady konverzací s `Elizou`.
