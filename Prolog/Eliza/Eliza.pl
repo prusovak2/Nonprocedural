@@ -1,7 +1,7 @@
 % ELIZA 
 % Katerina Prusova, sophomore MFF UK
-% summer semestr 2019/2020
-% nonprocedural programing NPRG005
+% summer term 2019/2020
+% nonprocedural programming NPRG005
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% INPUT PARSER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % readLetter(+inputLetter, -listOfLettersTheWordConsistsof, -letterFollowingTheWord)
@@ -11,7 +11,7 @@ readLetters(63, [], 63) :- !.  %question mark ?
 readLetters(32, [], 32) :- !.  %space
 readLetters(9, [], 9) :- !.  %horizontal tab
 readLetters(44, [], 44) :- !.  %comma
-readLetters(10, [], 10):-!. %Line feed
+readLetters(10, [], 10):-!. %Line feed ,
 readLetters(13, [], 13):-!. %carrige return
 % read letters of one word until word ends
 readLetters(Letter, [Letter|LetterList], AnotherLetter):-
@@ -28,7 +28,7 @@ readRest(63, []) :- !.  %question mark ?
 readRest(32, WordList) :- 
     readSentence(WordList).  %space
 readRest(44, WordList) :- 
-        readSentence(WordList).  %comma
+        readSentence(WordList).  %comma ,
 readRest(10, WordList) :- 
             readSentence(WordList). %Line feed
 readRest(13, WordList) :- 
