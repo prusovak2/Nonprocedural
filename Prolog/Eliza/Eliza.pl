@@ -202,6 +202,7 @@ pattern(what,[73], 1,_).
 pattern(because,[73], 1,_).
 pattern(can,[73,can,i,1] ,1,_).
 pattern(can,[73,can,you,1], 2,_).
+pattern(can,[73], 3,_).
 pattern(why,[73,why,dont,i,1], 1,_).
 pattern(why,[73,why,cant,you,1], 2,_).
 pattern(why,[73], 3,_).
@@ -270,6 +271,7 @@ prepareScript():-
     assertz(toUse(because,1,0)),
     assertz(toUse(can,1,0)),
     assertz(toUse(can,2,0)),
+    assertz(toUse(can,3,0)),
     assertz(toUse(why,1,0)),
     assertz(toUse(why,2,0)),
     assertz(toUse(why,3,0)),
@@ -356,7 +358,7 @@ response(none, 1, [
     ['I',am,not,sure,'I',understand,you,fully,'.'],
     ['I',just,want,to,be,upfront,and,say,that,'I',visually,enjoy,you,'.'],
     [please,go,on,'.'],
-    ['I','don\'t',know,about,that,but,do,you,know,what,?,'You',could,never,be,an,ice,cream,because,'you\'re',so,hot,'...',and,a,person,'.'],
+    ['I','don\'t',know,about,that,but,do,you,know,what,?,'You',could,never,be,an,icecream,because,'you\'re',so,hot,'...',and,a,person,'.'],
     [what,does,that,suggest,to,you,?],
     [what,you,are,saying,is,confusing,but,'I\'m',pretty,sure,that,if,you,were,a,fruit,'you\'d',be,a,fineapple,'.'],
     [do,you,feel,strongly,about,discussing,such,things,?],
@@ -465,6 +467,12 @@ response(can,2,[
     [whether,or,not,you,can,1,depends,on,you,more,than,on,me,'.'],
     [do,you,want,to,be,able,to,1,?],
     [perhaps,you,do,not,want,to,1,'.']
+],_).
+% _ can _   
+response(can,3,[
+    [actually,?],
+    [i, cannot,'.'],
+    [who, cares,?]
 ],_).
 % _ why dont you 1
 response(why,1,[
@@ -678,7 +686,7 @@ response(sorry,1,[
 ],_).
 % _ if 1
 response(if,1,[ 
-    [do,you,think,it,is,likely,that,1,?],
+    [do,you,think,it,is,likely,that,if,1,?],
     [do,you,wish,that,1,?],
     [what,do,you,think,about,1,?],
     [really,',',if,1,?]
@@ -737,7 +745,7 @@ desire(wish).
 think(think).
 think(hope).
 think(recon).
-think(belive).
+think(believe).
 think(wish).
 think(belive).
 think(suppose).
@@ -762,6 +770,7 @@ family(sister).
 family(children).
 family(wife).
 family(husband).
+family(family).
 
 closeOne(girlfriend).
 closeOne(boyfriend).
@@ -910,7 +919,9 @@ eliza:-
 eliza(Sentence):- %quit
     member('bye', Sentence),!, 
     write('Thanks for a chat. If I don\'t se you around, I will see you square.'),!.
-eliza(Sentence):- % work with memory 
+eliza(Sentence):- % work with memory
+    length(Sentence, Len),
+    0 < Len, %to cope with ...
     simplify(Sentence,Simplified),
     tryFindImportant(Simplified,Important),% +-cut? % should fail when no important found
     getMemoryResponse(Important,Simplified,Response),
@@ -919,6 +930,8 @@ eliza(Sentence):- % work with memory
     !,
     eliza(AnotherSentence).
 eliza(Sentence):- % ordinary response
+    length(Sentence, Len),
+    0 < Len, %to cope with ...
     simplify(Sentence, Simplified),
     findMostImportantKeyWord(Simplified, _, KeyWord),
     getResponse(KeyWord, Simplified, Response),
@@ -926,7 +939,9 @@ eliza(Sentence):- % ordinary response
     readSentenceCastingNumbers(AnotherSentence),
     !,
     eliza(AnotherSentence).
-
+eliza(_):- % to cope with ...
+    readSentenceCastingNumbers(AnotherSentence),
+    eliza(AnotherSentence).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% TEST METHODS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 testResponse(X,Y,Z,A,B,C,D,E):-
