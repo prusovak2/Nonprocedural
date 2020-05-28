@@ -10,9 +10,9 @@ Predikáty programu lze z dle účelu pomyslně rozdělit do tří částí. Prv
 
 ### Parser uživatelského vstupu
 
-Parser je z velké části převzatý z implementace z přednášky. Vstup je čten po znacích, predikát `readLetters` čte písmena dokud nedetekuje konec slova (zde jsem implementaci rozšířila o větší škálu `charů`, jež slovo ukončí). Predikát `readRest`čte slova věty, dokud nenarazí na tečku, otazník či vykřičník, což jsou jediné `chary` indikující konec věty.
+Parser je z velké části převzatý z implementace z přednášky. Vstup je čten po znacích. Predikát `readLetters` čte písmena dokud nedetekuje konec slova (zde jsem implementaci rozšířila o větší škálu `charů`, jež slovo ukončí). Predikát `readRest`čte slova věty, dokud nenarazí na **tečku, otazník či vykřičník**, což jsou jediné `chary` indikující konec věty.
 
-Za zmínku stojí preprocessing, který je v rámci parsování s uživatelskou větou proveden. Všechna písmena všech slov jsou převedena do lower case. To zaprvé umožňuje Elize namatchovat slova ze vstupu bez ohledu na to, zda je uživatel zadal v lower či upper case, aniž by bylo třeba jakkoli komplikovat logiku programu. Zadruhé se tak zbavím velkých písmen na začátcích slov. To je podstatné, neboť slova jsou v programu reprezentována `atomy` a velké písmeno na začátku by způsobilo zaměnění za Prologovskou proměnnou. Z podobného důvodu jsou všechna čísla v uživatelském vstupu převedena na `string`. Logika budující odpověď používá čísla ve vzorech vět a odpovědí a provádí jejich prostřednictvím substituce slov z  uživatelem zadané věty do věty na výstupu. Proto jsme shledala za rozumnější se čísel ve vstupu zbavit, abych se vyvarovala jejich dezinterpretace za interní symboly a následného zmatení algoritmu budujícího odpověď.
+Za zmínku stojí preprocessing, který je v rámci parsování s uživatelskou větou proveden. Všechna písmena všech slov jsou převedena do lower case. To zaprvé umožňuje `Elize` namatchovat slova ze vstupu bez ohledu na to, zda je uživatel zadal v lower či upper case, aniž by bylo třeba jakkoli komplikovat logiku programu. Zadruhé se tak zbavím velkých písmen na začátcích slov. To je podstatné, neboť slova jsou v programu reprezentována `atomy` a velké písmeno na začátku by mohlo způsobit zaměnění za Prologovskou proměnnou. Z podobného důvodu jsou všechna čísla v uživatelském vstupu převedena na `string`. Logika budující odpověď používá čísla ve vzorech vět a provádí jejich prostřednictvím substituce slov z  uživatelem zadané věty do věty na výstupu. Proto jsme shledala za rozumnější se čísel ve vstupu zbavit, abych se vyvarovala jejich dezinterpretace za interní symboly a následného zmatení algoritmu budujícího odpověď.
 
 ### Budování odpovědi
 
@@ -80,7 +80,7 @@ response(your,2,[
 ],X).
 ```
 
- O výběr konkrétního vzoru ze seznamu se stará predikát `getResponse` společně s dynamickým predikátem `toUse`. `Eliza` je naimplementována, aby postupně prostřídala všechny vzory z příslušného seznamu, je-li opakovaně konfrontována s podobnými dotazy. Predikát `toUse` má jednu klauzuli pro každou kombinaci klíčového slova a `Id` vstupního vzoru, ve které je uložen index toho vzoru odpovědi, který má být aktuálně použit. Po využití dané odpovědi je klauzule odstraněna prostřednictvím predikátu pro modifikaci programu `retract`, je vypočítán nový index a pomocí `assert` je přidána nová klauzule predikátu `toUse`.
+ O výběr konkrétního vzoru ze seznamu se stará predikát `getResponse` společně s dynamickým predikátem `toUse`. `Eliza` je naimplementována, aby postupně prostřídala všechny vzory z příslušného seznamu, je-li opakovaně konfrontována s podobnými dotazy. Predikát `toUse` má jednu klauzuli pro každou kombinaci klíčového slova a `Id` vstupního vzoru. V té které je uložen index toho vzoru odpovědi, který má být aktuálně použit. Po využití dané odpovědi je klauzule odstraněna prostřednictvím predikátu pro modifikaci programu `retract`, je vypočítán nový index a pomocí `assert` je přidána nová klauzule predikátu `toUse`.
 
 ```Prolog
 toUse(KeyWord,PatternNum,LastUsedNum),
@@ -107,7 +107,7 @@ Některé vstupní vzory budou namatchovány  pouze, obsahuje-li vstupní věta 
 
 ### Paměť
 
-Eliza implementuje jednoduchou paměť. Pokud uživatel použije slovo, pro které je splněn predikát `important`, predikát `tryFindImportant` v druhé klauzuli `Eliza/1` uspěje a místo predikátu `getResponse` se použije `getMemoryResponse`. Tento predikát zkontroluje, zda je v programu již přítomna klauzule predikátu `mem(ImportantWord,SentenceInMemory)` s prvním argumentem odpovídajícím danému důležitému slovu. Pokud ano, je zapamatovaná věta vyjmuta z paměti (`retract`), použita v odpovědi (namatchovaná na speciální `response` pattern `mem`) a pro dané klíčové slovo je nově zapamatována věta, kterou uživatel právě zadal (`assert`). Jinak je věta pouze zapamatována a je zformulována standartní odpověď (`getResponse`). Eliza bere v potaz první důležité slovo, co se ve větě vyskytuje.
+`Eliza` implementuje jednoduchou paměť. Pokud uživatel použije slovo, pro které je splněn predikát `important`, predikát `tryFindImportant` v druhé klauzuli `Eliza/1` uspěje a místo predikátu `getResponse` se použije `getMemoryResponse`. Tento predikát zkontroluje, zda je v programu již přítomna klauzule predikátu `mem(ImportantWord,SentenceInMemory)` s prvním argumentem odpovídajícím danému důležitému slovu. Pokud ano, je zapamatovaná věta vyjmuta z paměti (`retract`), použita v odpovědi (namatchovaná na speciální `response` pattern `mem`) a pro dané klíčové slovo je nově zapamatována věta, kterou uživatel právě zadal (`assert`). Jinak je věta pouze zapamatována a je zformulována standartní odpověď (`getResponse`). `Eliza` bere v potaz první důležité slovo, co se ve větě vyskytuje.
 
 ```Prolog
 important(X):-family(X).
@@ -121,9 +121,72 @@ important(X):-day(X).
 
 ###Výpis výstupu
 
-Na predikátu `reply`, která vypíše vybudovanou větu na výstup není nic pozoruhodného, snad jen že převede první písmeno prvního slova věty do upper case. To umožňuje vkládat části uživatelem napsané věty (jejíž všechna písmena byla při parsování převedena do lower case) i na začátek vybudované odpovědi bez újmy na tom, že každá slušná věta začíná velkým písmenem. Navíc to zbavuje mou programátorskou maličkost nutnosti kontrolovat, zda každý z nemála vzorů odpovědi začíná velkým písmenem.  
+Na predikátu `reply`, která vypíše vybudovanou větu na výstup není nic pozoruhodného, Za zmínku stojí snad jen, že převede první písmeno prvního slova věty do upper case. To umožňuje vkládat části uživatelem napsané věty (jejíž všechna písmena byla při parsování převedena do lower case) i na začátek vybudované odpovědi bez újmy na tom, že každá slušná věta začíná velkým písmenem. Navíc to zbavuje mou programátorskou maličkost nutnosti kontrolovat, zda každý z nemála vzorů odpovědi začíná velkým písmenem.  
 
 ##Uživatelská dokumentace
+
+Program lze spustit příkazem **eliza**.  Poté může uživatel zadávat libovolné věty v angličtině a `Eliza` na ně bude více či méně trefně odpovídat. Je třeba zadat vždy právě jednu větu a ukončit ji **tečkou**, **otazníkem** či **vykřičníkem**. Pro ukončení konverzace s `Elizou` stačí zadat větu obsahující slovo **bye**.
+Z povahy zadání mi nepřijde smysluplné uvádět množinu testovacích dat. Každá anglická věta je validním vstupem. Přikládám místo toho příklady konverzací s `Elizou`.
+
+```
+Hello, I am Eliza. What is bothering you?
+|: That I have nobody else to talk to than a stupid machine.
+Do computers worry you ? 
+|: My social life worries me.
+Your social life worries you ? 
+|: You bet.
+We were discussing you , not me . 
+|: Why cant we discuss you, you stupid machine?
+Why do you mention computers ? 
+|: Coz I am talking to a computer.
+Can you imagine dating a machine ? 
+|: Eh, no really.
+Are you saying no just to be negative ? 
+|: Im saying no because I dont want to date a computer.
+Don't you consider machines superior to people ? 
+|: Do you consider them superior?
+Oh , i consider them superior . 
+|: bye.
+Thanks for a chat. If I don't se you around, I will see you square.
+```
+
+```
+% priklad fungovani pameti
+Hello, I am Eliza. What is bothering you?
+|: My boyfriend is a jerk.
+Tell me more about people around you . 
+|: I dont have many friends.
+Do you really not have many friends ? 
+|: I dont, I hang out with my boyfriend most of the time.
+Lets discuss further why your boyfriend is a jerk . 
+|: bye.
+Thanks for a chat. If I don't se you around, I will see you square.
+```
+```
+What is it you really want to know ? 
+|: So tell me what you want, what you really really want.
+Are such questions much on your mind ? 
+|: Just when I remember that stupid song.
+Do you often think of that stupid song ? 
+|: Fortunately not.
+I just want to be upfront and say that I visually enjoy you . 
+|: I just want to be rude and say that I dont.
+Why do you not ? 
+|: Have you seen your font?
+Why are you concerned over my font ? 
+|: It quite plain.
+Please go on . 
+|: And boring.
+I don't know about that but do you know what ? You could never be an icecream because you're so hot ... and a person . 
+|: I am barely a person.
+How long have you been barely a person ? 
+|: Whole time I can remember of.
+It is deffinitely worth remembering tell me more . 
+|: Well not being a person is kind of like being you.
+You are not really talking about me , are you ? 
+```
+
+
 
 
 
